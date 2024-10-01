@@ -31,6 +31,7 @@ mod PiggyBankFactory {
             let (piggy_bank_contract, _) = deploy_syscall(piggy_bank_classhash, 0, payload.span(), false).unwrap();
 
             self.total_piggy_banks.write(self.total_piggy_banks.read() + 1);
+            
             self.piggy_banks.append().write(piggy_bank_contract);
 
             let user_banks = self.user_piggy_banks.entry(caller);
