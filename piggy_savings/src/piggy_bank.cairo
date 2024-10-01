@@ -137,6 +137,10 @@ mod PiggyBank {
         fn show_token_penal_fee(self: @ContractState, token_address: ContractAddress) -> u256 {
             self.calculate_penal_fee(token_address)
         }
+
+        fn owner(self: @ContractState) -> ContractAddress {
+            self.owner.read()
+        }
     }
 
     #[generate_trait]

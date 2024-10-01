@@ -8,4 +8,5 @@ pub trait IPiggyBank<TContractState> {
     fn add_supported_token(ref self: TContractState, token_address: ContractAddress);
     fn total_amount_saved(self: @TContractState, token_address: ContractAddress) -> u256;
     fn show_token_penal_fee(self: @TContractState, token_address: ContractAddress) -> u256;
+    fn owner(self: @TContractState) -> ContractAddress;
 }

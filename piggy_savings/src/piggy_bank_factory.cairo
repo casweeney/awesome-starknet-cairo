@@ -14,6 +14,20 @@ mod PiggyBankFactory {
         piggy_banks: Vec<ContractAddress>,
         user_piggy_banks: Map<ContractAddress, Vec<ContractAddress>>,
         total_piggy_banks: u256,
+        dev_address: ContractAddress,
+        is_dev_address_added: bool,
+    }
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        DevAddressInitiated: DevAddressInitiated,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DevAddressInitiated {
+        dev_address: ContractAddress,
+        init_status: bool,
     }
 
     #[constructor]
@@ -25,13 +39,16 @@ mod PiggyBankFactory {
 
     #[abi(embed_v0)]
     impl PiggyBankFactoryImpl of IPiggyBankFactory<ContractState> {
-        fn create_piggy_bank(ref self: ContractState, piggy_bank_classhash: ClassHash, dev_address: ContractAddress, saving_purpose: ByteArray, time_lock: u256) {
+        fn create_piggy_bank(ref self: ContractState, piggy_bank_classhash: ClassHash, saving_purpose: ByteArray, time_lock: u256) {
+
+            assert(self.is_dev_address_added.read(), 'dev address not initialized');
+
             let mut payload = array![];
 
             let caller = get_caller_address();
             piggy_bank_classhash.serialize(ref payload);
             caller.serialize(ref payload);
-            dev_address.serialize(ref payload);
+            self.dev_address.read().serialize(ref payload);
             saving_purpose.serialize(ref payload);
             time_lock.serialize(ref payload);
 
@@ -112,6 +129,25 @@ mod PiggyBankFactory {
             };
 
             user_banks_array.len().into()
+        }
+
+        fn init_dev_address(ref self: ContractState, dev_address: ContractAddress) {
+            let caller = get_caller_address();
+
+            assert(caller == self.owner.read(), 'unauthorzed caller');
+
+            self.dev_address.write(dev_address);
+            self.is_dev_address_added.write(true);
+
+            self.emit(DevAddressInitiated { dev_address, init_status: self.is_dev_address_added.read()  });
+        }
+        
+        fn show_dev_address(self: @ContractState) -> ContractAddress {
+            self.dev_address.read()
+        }
+
+        fn owner(self: @ContractState) -> ContractAddress {
+            self.owner.read()
         }
     }
 }
