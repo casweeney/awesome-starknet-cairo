@@ -50,7 +50,7 @@ mod PiggyBank {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, owner: ContractAddress, dev_address: ContractAddress, saving_purpose: ByteArray, time_lock: u256,) {
+    fn constructor(ref self: ContractState, owner: ContractAddress, dev_address: ContractAddress, saving_purpose: ByteArray, time_lock: u256) {
         self.owner.write(owner);
         self.dev_address.write(dev_address);
         self.saving_purpose.write(saving_purpose);

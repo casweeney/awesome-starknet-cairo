@@ -16,6 +16,13 @@ mod PiggyBankFactory {
         total_piggy_banks: u256,
     }
 
+    #[constructor]
+    fn constructor(ref self: ContractState) {
+        let caller = get_caller_address();
+        
+        self.owner.write(caller);
+    }
+
     #[abi(embed_v0)]
     impl PiggyBankFactoryImpl of IPiggyBankFactory<ContractState> {
         fn create_piggy_bank(ref self: ContractState, piggy_bank_classhash: ClassHash, dev_address: ContractAddress, saving_purpose: ByteArray, time_lock: u256) {
