@@ -3,7 +3,7 @@ mod PiggyBank {
     use piggy_savings::interfaces::piggy_bank_interface::IPiggyBank;
     use core::starknet::{ContractAddress, get_caller_address, get_contract_address};
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry};
-    use piggy_savings::interfaces::ierc20::{IERC20, IERC20Dispatcher, IERC20DispatcherTrait};
+    use piggy_savings::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 
     #[storage]
@@ -12,8 +12,33 @@ mod PiggyBank {
         dev_address: ContractAddress,
         saving_purpose: ByteArray,
         time_lock: u256,
-        balance: Map<ContractAddress, u256>,
         supported_tokens: Map<ContractAddress, bool>,
+    }
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        Deposited: Deposited,
+        TokenAdded: TokenAdded,
+        Withdrawn: Withdrawn,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct Deposited {
+        user: ContractAddress,
+        amount: u256,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct TokenAdded {
+        token: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct Withdrawn {
+        user: ContractAddress,
+        token: ContractAddress,
+        amount: u256,
     }
 
     #[constructor]
@@ -21,7 +46,7 @@ mod PiggyBank {
         self.owner.write(owner);
         self.dev_address.write(dev_address);
         self.saving_purpose.write(saving_purpose);
-        self.time_lock.write(10);
+        self.time_lock.write(time_lock);
     }
 
 
@@ -39,10 +64,25 @@ mod PiggyBank {
             assert(token.balance_of(caller) >= amount, 'insufficient funds');
 
             token.transfer_from(caller, this_contract, amount);
+
+            self.emit(Deposited { user: caller, amount });
         }
 
-        fn safe_withdraw(ref self: ContractState) {
+        fn safe_withdraw(ref self: ContractState, token_address: ContractAddress) {
+            let caller = get_caller_address();
+            assert(caller == self.owner.read(),'unauthorized user');
 
+            let token = IERC20Dispatcher { contract_address: token_address };
+
+            let contract_token_balance = token.balance_of(get_contract_address());
+
+            token.transfer(caller, contract_token_balance);
+
+            self.emit(Withdrawn {
+                user: caller,
+                token: token_address,
+                amount: contract_token_balance
+            });
         }
 
         fn emergency_withdrawal(ref self: ContractState) {
@@ -50,15 +90,19 @@ mod PiggyBank {
         }
 
         fn add_supported_token(ref self: ContractState, token_address: ContractAddress) {
+            let caller = get_caller_address();
+            assert(caller == self.owner.read(), 'invalid owner');
 
+            let is_token_supported = self.supported_tokens.entry(token_address).read();
+            assert(!is_token_supported, 'token is already supported');
+
+            self.supported_tokens.entry(token_address).write(true);
+
+            self.emit(TokenAdded {token: token_address});
         }
 
-        fn total_amount_saved(ref self: ContractState) -> u256 {
-            1
-        }
-
-        fn get_contract_balance(ref self: ContractState) -> u256 {
-            2
+        fn total_amount_saved(self: @ContractState, token_address: ContractAddress) -> u256 {
+            IERC20Dispatcher {contract_address: token_address}.balance_of(get_contract_address())
         }
     }
 
