@@ -2,9 +2,15 @@
 version = 1
 
 [[package]]
+name = "openzeppelin"
+version = "0.8.0"
+source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.8.0#6ab91b5cf57d6a7d02f2d5c5abfc7b5712bc8e47"
+
+[[package]]
 name = "piggy_savings"
 version = "0.1.0"
 dependencies = [
+ "openzeppelin",
  "snforge_std",
 ]
 
