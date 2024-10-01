@@ -21,6 +21,7 @@ mod PiggyBank {
         Deposited: Deposited,
         TokenAdded: TokenAdded,
         Withdrawn: Withdrawn,
+        EmergencyWithdrawal: EmergencyWithdrawal,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -36,6 +37,13 @@ mod PiggyBank {
 
     #[derive(Drop, starknet::Event)]
     struct Withdrawn {
+        user: ContractAddress,
+        token: ContractAddress,
+        amount: u256,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct EmergencyWithdrawal {
         user: ContractAddress,
         token: ContractAddress,
         amount: u256,
@@ -89,8 +97,25 @@ mod PiggyBank {
             });
         }
 
-        fn emergency_withdrawal(ref self: ContractState) {
+        fn emergency_withdrawal(ref self: ContractState, token_address: ContractAddress) {
+            let caller = get_caller_address();
+            assert(caller == self.owner.read(),'unauthorized user');
 
+            let token = IERC20Dispatcher { contract_address: token_address };
+
+            let contract_token_balance = token.balance_of(get_contract_address());
+
+            let penal_fee = self.calculate_penal_fee(token_address);
+            let actual_withdraw_amount = contract_token_balance - penal_fee;
+
+            token.transfer(caller, actual_withdraw_amount);
+            token.transfer(self.dev_address.read(), penal_fee);
+
+            self.emit(EmergencyWithdrawal {
+                user: caller,
+                token: token_address,
+                amount: contract_token_balance
+            });
         }
 
         fn add_supported_token(ref self: ContractState, token_address: ContractAddress) {
