@@ -3,7 +3,7 @@ mod PiggyBank {
     use piggy_savings::interfaces::piggy_bank_interface::IPiggyBank;
     use core::starknet::{ContractAddress, get_caller_address, get_contract_address};
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry};
-    use piggy_savings::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use piggy_savings::interfaces::erc20_interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 
     #[storage]
@@ -50,7 +50,7 @@ mod PiggyBank {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, owner: ContractAddress, dev_address: ContractAddress, saving_purpose: ByteArray, time_lock: u256,) {
+    fn constructor(ref self: ContractState, owner: ContractAddress, dev_address: ContractAddress, saving_purpose: ByteArray, time_lock: u256) {
         self.owner.write(owner);
         self.dev_address.write(dev_address);
         self.saving_purpose.write(saving_purpose);
@@ -132,6 +132,14 @@ mod PiggyBank {
 
         fn total_amount_saved(self: @ContractState, token_address: ContractAddress) -> u256 {
             IERC20Dispatcher {contract_address: token_address}.balance_of(get_contract_address())
+        }
+
+        fn show_token_penal_fee(self: @ContractState, token_address: ContractAddress) -> u256 {
+            self.calculate_penal_fee(token_address)
+        }
+
+        fn owner(self: @ContractState) -> ContractAddress {
+            self.owner.read()
         }
     }
 
