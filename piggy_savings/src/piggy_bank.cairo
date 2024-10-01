@@ -76,7 +76,11 @@ mod PiggyBank {
 
             let contract_token_balance = token.balance_of(get_contract_address());
 
-            token.transfer(caller, contract_token_balance);
+            let saving_commission = self.saving_commission(token_address);
+            let actual_withdraw_amount = contract_token_balance - saving_commission;
+
+            token.transfer(caller, actual_withdraw_amount);
+            token.transfer(self.dev_address.read(), saving_commission);
 
             self.emit(Withdrawn {
                 user: caller,
@@ -108,13 +112,25 @@ mod PiggyBank {
 
     #[generate_trait]
     pub impl InternalImpl of InternalTrait {
-        fn calculate_penal_fee() -> u256 {
+        fn calculate_penal_fee(self: @ContractState, token_address: ContractAddress) -> u256 {
 
-            80
+            let token = IERC20Dispatcher{ contract_address: token_address };
+
+            let token_contract_balance = token.balance_of(get_contract_address());
+
+            let percent = (token_contract_balance * 1500) / 10000; // 15%
+
+            percent
         }
 
-        fn saving_commission() -> u256 {
-            10
+        fn saving_commission(self: @ContractState, token_address: ContractAddress) -> u256 {
+            let token = IERC20Dispatcher{ contract_address: token_address };
+
+            let token_contract_balance = token.balance_of(get_contract_address());
+
+            let commission = (token_contract_balance * 100) / 100000; // 0.1%
+
+            commission
         }
     }
 }
