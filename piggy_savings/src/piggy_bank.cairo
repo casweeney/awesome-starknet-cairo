@@ -3,7 +3,7 @@ mod PiggyBank {
     use piggy_savings::interfaces::piggy_bank_interface::IPiggyBank;
     use core::starknet::{ContractAddress, get_caller_address, get_contract_address};
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry};
-    use piggy_savings::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use piggy_savings::interfaces::erc20_interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 
     #[storage]
