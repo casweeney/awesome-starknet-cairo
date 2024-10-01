@@ -133,6 +133,10 @@ mod PiggyBank {
         fn total_amount_saved(self: @ContractState, token_address: ContractAddress) -> u256 {
             IERC20Dispatcher {contract_address: token_address}.balance_of(get_contract_address())
         }
+
+        fn show_token_penal_fee(self: @ContractState, token_address: ContractAddress) -> u256 {
+            self.calculate_penal_fee(token_address)
+        }
     }
 
     #[generate_trait]
