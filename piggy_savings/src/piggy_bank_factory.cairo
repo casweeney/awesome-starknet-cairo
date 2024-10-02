@@ -31,10 +31,8 @@ mod PiggyBankFactory {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState) {
-        let caller = get_caller_address();
-        
-        self.owner.write(caller);
+    fn constructor(ref self: ContractState, owner: ContractAddress) {
+        self.owner.write(owner);
     }
 
     #[abi(embed_v0)]
