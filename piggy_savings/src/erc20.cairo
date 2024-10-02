@@ -9,7 +9,7 @@ use starknet::{ContractAddress, get_caller_address};
     #[storage]
     pub struct Storage {
         balances: Map<ContractAddress, u256>,
-        allowances: Map<(ContractAddress, ContractAddress), u256>,
+        allowances: Map<(ContractAddress, ContractAddress), u256>, // Mapping<(owner, spender), amount>
         token_name: ByteArray,
         symbol: ByteArray,
         decimal: u8,
@@ -58,8 +58,6 @@ use starknet::{ContractAddress, get_caller_address};
 
         fn balance_of(self: @ContractState, account: ContractAddress) -> u256 {
             let balance = self.balances.entry(account).read();
-
-            let balance = self.balances.read(account);
 
             balance
         }
