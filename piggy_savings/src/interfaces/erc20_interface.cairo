@@ -1,16 +1,17 @@
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts for Cairo v0.17.0 (token/erc20/interface.cairo)
-
-use starknet::ContractAddress;
+use starknet::{ContractAddress};
 
 #[starknet::interface]
-pub trait IERC20<TState> {
-    fn total_supply(self: @TState) -> u256;
-    fn balance_of(self: @TState, account: ContractAddress) -> u256;
-    fn allowance(self: @TState, owner: ContractAddress, spender: ContractAddress) -> u256;
-    fn transfer(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
-    fn transfer_from(
-        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
-    ) -> bool;
-    fn approve(ref self: TState, spender: ContractAddress, amount: u256) -> bool;
+pub trait IERC20<TContractState> {
+    fn total_supply(self: @TContractState) -> u256;
+    fn balance_of(self: @TContractState, account: ContractAddress) -> u256;
+    fn allowance(self: @TContractState, owner: ContractAddress, spender: ContractAddress) -> u256;
+    fn transfer(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
+    fn transfer_from(ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
+    fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
+
+    fn name(self: @TContractState) -> ByteArray;
+    fn symbol(self: @TContractState) -> ByteArray;
+    fn decimals(self: @TContractState) -> u8;
+
+    fn mint(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
 }
