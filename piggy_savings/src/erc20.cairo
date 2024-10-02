@@ -9,7 +9,7 @@ use starknet::{ContractAddress, get_caller_address};
     #[storage]
     pub struct Storage {
         balances: Map<ContractAddress, u256>,
-        allowances: Map<ContractAddress, Map<ContractAddress, u256>>,
+        allowances: Map<(ContractAddress, ContractAddress), u256>,
         token_name: ByteArray,
         symbol: ByteArray,
         decimal: u8,
@@ -58,14 +58,14 @@ use starknet::{ContractAddress, get_caller_address};
 
         fn balance_of(self: @ContractState, account: ContractAddress) -> u256 {
             let balance = self.balances.entry(account).read();
-            
+
             let balance = self.balances.read(account);
 
             balance
         }
 
         fn allowance(self: @ContractState, owner: ContractAddress, spender: ContractAddress) -> u256 {
-            let allowance = self.allowances.entry(owner).entry(spender).read();
+            let allowance = self.allowances.entry((owner, spender)).read();
 
             allowance
         }
@@ -91,14 +91,14 @@ use starknet::{ContractAddress, get_caller_address};
         fn transfer_from(ref self: ContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool {
             let caller = get_caller_address();
 
-            let caller_allowance = self.allowances.entry(sender).entry(caller).read();
+            let caller_allowance = self.allowances.entry((sender, caller)).read();
             let sender_balance = self.balances.entry(sender).read();
             let recipient_balance = self.balances.entry(recipient).read();
 
             assert(caller_allowance >= amount, 'amount exceeds allowance');
             assert(sender_balance >= amount, 'amount exceeds balance');
 
-            self.allowances.entry(sender).entry(caller).write(caller_allowance - amount);
+            self.allowances.entry((sender, caller)).write(caller_allowance - amount);
             self.balances.entry(sender).write(sender_balance - amount);
             self.balances.entry(recipient).write(recipient_balance + amount);
 
@@ -110,7 +110,7 @@ use starknet::{ContractAddress, get_caller_address};
         fn approve(ref self: ContractState, spender: ContractAddress, amount: u256) -> bool {
             let caller = get_caller_address();
 
-            self.allowances.entry(caller).entry(spender).write(amount);
+            self.allowances.entry((caller, spender)).write(amount);
 
             self.emit(Approval { owner: caller, spender, value: amount });
 
