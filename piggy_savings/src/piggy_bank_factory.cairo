@@ -31,24 +31,22 @@ mod PiggyBankFactory {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState) {
-        let caller = get_caller_address();
-        
-        self.owner.write(caller);
+    fn constructor(ref self: ContractState, owner: ContractAddress) {
+        self.owner.write(owner);
     }
 
     #[abi(embed_v0)]
     impl PiggyBankFactoryImpl of IPiggyBankFactory<ContractState> {
         fn create_piggy_bank(ref self: ContractState, piggy_bank_classhash: ClassHash, saving_purpose: ByteArray, time_lock: u256) {
 
-            assert(self.is_dev_address_added.read(), 'dev address not initialized');
+            assert!(self.is_dev_address_added.read(), "dev address not initialized");
 
             let mut payload = array![];
 
             let caller = get_caller_address();
-            piggy_bank_classhash.serialize(ref payload);
-            caller.serialize(ref payload);
-            self.dev_address.read().serialize(ref payload);
+
+            caller.serialize(ref payload); //owner
+            self.dev_address.read().serialize(ref payload); //dev address
             saving_purpose.serialize(ref payload);
             time_lock.serialize(ref payload);
 
@@ -58,21 +56,21 @@ mod PiggyBankFactory {
             
             self.piggy_banks.append().write(piggy_bank_contract);
 
-            let user_banks = self.user_piggy_banks.entry(caller);
+            // let user_banks = self.user_piggy_banks.entry(caller);
 
-            loop {
-                let mut i = 0;
+            // loop {
+            //     let mut i = 0;
 
-                if i > self.piggy_banks.len() {
-                    break;
-                }
+            //     if i > self.piggy_banks.len() {
+            //         break;
+            //     }
 
-                let mut bank_contract = self.piggy_banks.at(i).read();
+            //     let mut bank_contract = self.piggy_banks.at(i).read();
 
-                user_banks.append().write(bank_contract);
+            //     user_banks.append().write(bank_contract);
 
-                i += 1;
-            }
+            //     i += 1;
+            // }
         }
 
         fn get_all_piggy_banks(self: @ContractState) -> Array<ContractAddress> {
@@ -134,7 +132,7 @@ mod PiggyBankFactory {
         fn init_dev_address(ref self: ContractState, dev_address: ContractAddress) {
             let caller = get_caller_address();
 
-            assert(caller == self.owner.read(), 'unauthorzed caller');
+            assert!(caller == self.owner.read(), "Unauthorzed caller");
 
             self.dev_address.write(dev_address);
             self.is_dev_address_added.write(true);
