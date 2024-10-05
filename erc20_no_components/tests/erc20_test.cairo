@@ -93,7 +93,7 @@ fn test_transfer() {
 
     erc20_token.mint(owner, amount);
 
-    assert(erc20_token.balance_of(owner) > 0, 'mint faild');
+    assert(erc20_token.balance_of(owner) > 0, 'mint failed');
     assert(erc20_token.balance_of(owner) == amount, 'wrong mint amount');
 
     let receiver_previous_balance = erc20_token.balance_of(recipient);
