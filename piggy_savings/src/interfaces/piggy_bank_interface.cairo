@@ -9,4 +9,5 @@ pub trait IPiggyBank<TContractState> {
     fn total_amount_saved(self: @TContractState, token_address: ContractAddress) -> u256;
     fn show_token_penal_fee(self: @TContractState, token_address: ContractAddress) -> u256;
     fn owner(self: @TContractState) -> ContractAddress;
+    fn get_contract_details(self: @TContractState) -> (ByteArray, u256);
 }

@@ -86,22 +86,41 @@ use starknet::{ContractAddress, get_caller_address};
             true
         }
 
+        // fn transfer_from(ref self: ContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool {
+        //     let caller = get_caller_address();
+
+        //     let caller_allowance = self.allowances.entry((sender, caller)).read();
+        //     let sender_balance = self.balances.entry(sender).read();
+        //     let recipient_balance = self.balances.entry(recipient).read();
+
+        //     assert(amount <= caller_allowance, 'amount exceeds allowance');
+        //     assert(amount <= sender_balance, 'amount exceeds balance');
+
+        //     self.allowances.entry((sender, caller)).write(caller_allowance - amount);
+        //     self.balances.entry(sender).write(sender_balance - amount);
+        //     self.balances.entry(recipient).write(recipient_balance + amount);
+
+        //     self.emit(Transfer { from: sender, to: recipient, amount });
+
+        //     true
+        // }
+
         fn transfer_from(ref self: ContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool {
-            let caller = get_caller_address();
-
-            let caller_allowance = self.allowances.entry((sender, caller)).read();
-            let sender_balance = self.balances.entry(sender).read();
-            let recipient_balance = self.balances.entry(recipient).read();
-
-            assert(caller_allowance >= amount, 'amount exceeds allowance');
-            assert(sender_balance >= amount, 'amount exceeds balance');
-
-            self.allowances.entry((sender, caller)).write(caller_allowance - amount);
-            self.balances.entry(sender).write(sender_balance - amount);
-            self.balances.entry(recipient).write(recipient_balance + amount);
-
+            let spender = get_caller_address();
+        
+            let mut spender_allowance = self.allowances.read((sender, spender));
+            let mut sender_balance = self.balances.read(sender);
+            let mut recipient_balance = self.balances.read(recipient);
+        
+            assert(amount <= spender_allowance, 'amount exceeds allowance');
+            assert(amount <= sender_balance, 'amount exceeds balance');
+        
+            self.allowances.write((sender, spender), spender_allowance - amount);
+            self.balances.write(sender, sender_balance - amount);
+            self.balances.write(recipient, recipient_balance + amount);
+        
             self.emit(Transfer { from: sender, to: recipient, amount });
-
+        
             true
         }
 

@@ -141,6 +141,13 @@ mod PiggyBank {
         fn owner(self: @ContractState) -> ContractAddress {
             self.owner.read()
         }
+
+        fn get_contract_details(self: @ContractState) -> (ByteArray, u256) {
+            let saving_purpose = self.saving_purpose.read();
+            let time_lock = self.time_lock.read();
+
+            (saving_purpose, time_lock)
+        }
     }
 
     #[generate_trait]
