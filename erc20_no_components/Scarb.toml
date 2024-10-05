@@ -1,5 +1,5 @@
 [package]
-name = "piggy_savings"
+name = "erc20_no_components"
 version = "0.1.0"
 edition = "2023_11"
 
@@ -12,7 +12,6 @@ starknet = "2.8.2"
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.27.0" }
 
 [[target.starknet-contract]]
-casm = true
 sierra = true
 
 [scripts]

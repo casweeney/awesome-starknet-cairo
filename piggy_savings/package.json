@@ -1,0 +1,19 @@
+{
+  "name": "piggy_savings",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "deploy": "ts-node scripts/deploy.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tsconfig/node21": "21.0.3",
+    "dotenv": "^16.4.5",
+    "starknet": "^6.11.0",
+    "ts-node": "10.9.2",
+    "tslib": "^2.7.0",
+    "typescript": "5.5.4"
+  }
+}
