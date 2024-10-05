@@ -151,7 +151,7 @@ fn test_piggy_bank_deposit() {
 
     let piggy_factory = IPiggyBankFactoryDispatcher { contract_address };
 
-    // cheat caller to make the owner caller
+    // cheat caller to make the owner caller on Piggy_Factory
     start_cheat_caller_address(contract_address, owner);
 
     let dev_address: ContractAddress =  0x03af13f04C618e7824b80b61e141F5b7aeDB07F5CCe3aD16Dbd8A4BE333A3Ffa.try_into().unwrap();
@@ -161,9 +161,13 @@ fn test_piggy_bank_deposit() {
 
 
     let caller: ContractAddress = starknet::contract_address_const::<0x123456711>();
+
+    // using another caller to call create_piggy_bank on Piggy_Factory
     start_cheat_caller_address(contract_address, caller);
 
     piggy_factory.create_piggy_bank(piggy_bank_class.class_hash, saving_purpose.clone(), time_lock);
+
+    stop_cheat_caller_address(contract_address);
 
     let total_bank_count = piggy_factory.total_bank_count();
 
@@ -171,26 +175,32 @@ fn test_piggy_bank_deposit() {
 
     // testing the piggy bank contract
 
-    let bank_contract = *piggy_factory.get_all_piggy_banks()[0];
-    let piggy_bank = IPiggyBankDispatcher {contract_address: bank_contract};
+    let bank_contract_address = *piggy_factory.get_all_piggy_banks()[0];
+    let piggy_bank = IPiggyBankDispatcher {contract_address: bank_contract_address};
 
     // deploy, mint and approve ERC20
     let erc20_contract_address = deploy_erc20_contract("ERC20");
     let token = IERC20Dispatcher {contract_address: erc20_contract_address};
     let token_decimal = token.decimals();
 
+    // Make caller call ERC20 token functions to approve bank contract
     start_cheat_caller_address(erc20_contract_address, caller);
 
-    let mint_amount: u256 = 1000 * token_decimal.into();
+    let mint_amount: u256 = 1000 *  token_decimal.into();
     token.mint(caller, mint_amount);
 
     assert(token.balance_of(caller) == mint_amount, 'mint failed');
 
     let approve_amount = 100 * token_decimal.into();
-    token.approve(bank_contract, approve_amount);
+    token.approve(bank_contract_address, approve_amount);
 
-    start_cheat_caller_address(bank_contract, caller);
+    let allowance = token.allowance(caller, bank_contract_address);
+    assert(allowance == approve_amount, 'approval failed');
+    
+    stop_cheat_caller_address(erc20_contract_address);
+
     // add token as supported token
+    start_cheat_caller_address(bank_contract_address, caller);
     piggy_bank.add_supported_token(erc20_contract_address);
 
     // deposit into piggy bank contract
@@ -199,5 +209,5 @@ fn test_piggy_bank_deposit() {
 
     let amount_saved = piggy_bank.total_amount_saved(erc20_contract_address);
 
-    assert(amount_saved == deposit_amount, 'deposit faild');
+    assert(amount_saved == deposit_amount, 'deposit failed');
 }

@@ -65,8 +65,8 @@ mod PiggyBank {
             let caller = get_caller_address();
             let this_contract = get_contract_address();
 
-            let is_token_supported = self.supported_tokens.entry(token_address).read();
-            assert(is_token_supported, 'unsupported token');
+            // let is_token_supported = self.supported_tokens.entry(token_address).read();
+            // assert(is_token_supported, 'unsupported token');
 
             let token = IERC20Dispatcher{ contract_address: token_address };
             assert(token.balance_of(caller) >= amount, 'insufficient funds');
