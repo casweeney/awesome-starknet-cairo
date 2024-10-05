@@ -210,4 +210,5 @@ fn test_piggy_bank_deposit() {
     let amount_saved = piggy_bank.total_amount_saved(erc20_contract_address);
 
     assert(amount_saved == deposit_amount, 'deposit failed');
+    assert(token.balance_of(caller) + amount_saved == mint_amount, 'incorrect numbers');
 }
