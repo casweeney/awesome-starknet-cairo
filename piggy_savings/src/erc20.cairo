@@ -87,16 +87,16 @@ use starknet::{ContractAddress, get_caller_address};
         }
 
         fn transfer_from(ref self: ContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool {
-            let caller = get_caller_address();
+            let spender = get_caller_address();
 
-            let caller_allowance = self.allowances.entry((sender, caller)).read();
+            let spender_allowance = self.allowances.entry((sender, spender)).read();
             let sender_balance = self.balances.entry(sender).read();
             let recipient_balance = self.balances.entry(recipient).read();
 
-            assert(caller_allowance >= amount, 'amount exceeds allowance');
-            assert(sender_balance >= amount, 'amount exceeds balance');
+            assert(amount <= spender_allowance, 'amount exceeds allowance');
+            assert(amount <= sender_balance, 'amount exceeds balance');
 
-            self.allowances.entry((sender, caller)).write(caller_allowance - amount);
+            self.allowances.entry((sender, spender)).write(spender_allowance - amount);
             self.balances.entry(sender).write(sender_balance - amount);
             self.balances.entry(recipient).write(recipient_balance + amount);
 
