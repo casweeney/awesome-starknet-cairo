@@ -106,6 +106,6 @@ fn test_transfer() {
     assert(erc20_token.balance_of(owner) == amount - amount2, 'amount deduction failed');
 
     assert(erc20_token.balance_of(recipient) > receiver_previous_balance, 'wrong recipient balance');
-    assert(erc20_token.balance_of(recipient) == amount2, 'wrong recipient balance');
+    assert(erc20_token.balance_of(recipient) == amount2, 'recipient balance failed to increase');
     
 }
