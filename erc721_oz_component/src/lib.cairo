@@ -7,8 +7,7 @@ pub trait ICasOnStark<TContractState> {
 
 #[starknet::contract]
 mod CasOnStark {
-    use ERC721Component::InternalTrait;
-use starknet::ContractAddress;
+    use starknet::ContractAddress;
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
 
