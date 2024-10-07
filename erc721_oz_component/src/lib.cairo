@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+pub mod erc721_interface;
 
 #[starknet::interface]
 pub trait ICasOnStark<TContractState> {
