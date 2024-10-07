@@ -1,0 +1,3 @@
+NFT smart contract deployed on Starknet at: 0x62d1ae9ffc5cafb0a60dd5d1028b303327ec40b261070151ceca3eb0a9a1b40
+
+Deployed on Starknet mainnet at: 0x5121366cee10a2ded6b16afd714daf7fa43a020fe719c39f1208e387e8f2bd5
