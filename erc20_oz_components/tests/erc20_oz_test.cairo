@@ -2,7 +2,25 @@ use starknet::ContractAddress;
 
 use snforge_std::{declare, ContractClassTrait, start_cheat_caller_address, stop_cheat_caller_address};
 
-use erc20_oz_components::{IERC20CombinedDispatcher, IERC20CombinedDispatcherTrait};
+#[starknet::interface]
+pub trait IERC20Combined<TContractState> {
+    // IERC20 methods
+    fn total_supply(self: @TContractState) -> u256;
+    fn balance_of(self: @TContractState, account: ContractAddress) -> u256;
+    fn allowance(self: @TContractState, owner: ContractAddress, spender: ContractAddress) -> u256;
+    fn transfer(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
+    fn transfer_from(
+        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+    ) -> bool;
+    fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
+
+    // IERC20Metadata methods
+    fn name(self: @TContractState) -> ByteArray;
+    fn symbol(self: @TContractState) -> ByteArray;
+    fn decimals(self: @TContractState) -> u8;
+
+    fn mint(ref self: TContractState, recipient: ContractAddress, amount: u256);
+}
 
 
 fn deploy_contract(name: ByteArray) -> ContractAddress {
