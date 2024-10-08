@@ -30,7 +30,7 @@ async function main() {
     }
 
     const myCallData = new CallData(sierraCode.abi);
-    const base_uri = "ipfs://QmcW255SdUxVXEBB5QcYPYVMfk3jU9YiUHV4BVai2ULA9L";
+    const base_uri = "https://bafybeiceummd57srwm4ml54xeumtm5lzp2qswg2udennnexihnarchwkyq.ipfs.dweb.link/";
     
     const constructor = myCallData.compile("constructor", {
         base_uri,

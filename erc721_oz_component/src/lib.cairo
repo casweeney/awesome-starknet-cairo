@@ -33,7 +33,7 @@ mod CasOnStark {
 
     #[constructor]
     fn constructor(ref self: ContractState, base_uri: ByteArray) {
-        self.erc721.initializer("Codingcas on Starknet", "CCOS", base_uri);
+        self.erc721.initializer("Make it Work", "MIW", base_uri);
     }
 
     #[abi(embed_v0)]
