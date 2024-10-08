@@ -1,1 +1,1 @@
-ERC20 contract deployed on Starknet Sepolia at: 0x459e33a406c16685d88c9c82f7de6081a32ca9bc7fceefe9a26c6e6b8236ffc
+ERC20 contract deployed on Starknet Sepolia at: 0x3db0f12af9d740951c784282c62cbd68ebcc2091c7ca2e61bd745708c174e1
