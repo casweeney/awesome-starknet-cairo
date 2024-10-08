@@ -2,8 +2,31 @@ use starknet::ContractAddress;
 
 use snforge_std::{declare, ContractClassTrait, start_cheat_caller_address, stop_cheat_caller_address};
 
-use erc721_oz_component::erc721_interface::IERC721Dispatcher;
-use erc721_oz_component::erc721_interface::IERC721DispatcherTrait;
+#[starknet::interface]
+pub trait IERC721<TContractState> {
+    fn balance_of(self: @TContractState, account: ContractAddress) -> u256;
+    fn owner_of(self: @TContractState, token_id: u256) -> ContractAddress;
+    fn safe_transfer_from(
+        ref self: TContractState,
+        from: ContractAddress,
+        to: ContractAddress,
+        token_id: u256,
+        data: Span<felt252>
+    );
+    fn transfer_from(ref self: TContractState, from: ContractAddress, to: ContractAddress, token_id: u256);
+    fn approve(ref self: TContractState, to: ContractAddress, token_id: u256);
+    fn set_approval_for_all(ref self: TContractState, operator: ContractAddress, approved: bool);
+    fn get_approved(self: @TContractState, token_id: u256) -> ContractAddress;
+    fn is_approved_for_all(self: @TContractState, owner: ContractAddress, operator: ContractAddress) -> bool;
+
+    // IERC721Metadata
+    fn name(self: @TContractState) -> ByteArray;
+    fn symbol(self: @TContractState) -> ByteArray;
+    fn token_uri(self: @TContractState, token_id: u256) -> ByteArray;
+
+    // NFT contract
+    fn mint(ref self: TContractState, recipient: ContractAddress, token_id: u256);
+}
 
 fn deploy_contract(name: ByteArray) -> ContractAddress {
     let token_uri: ByteArray = "https://dummy_uri.com/your_id";
@@ -25,8 +48,8 @@ fn test_constructor() {
     let token_name = erc721_token.name();
     let token_symbol = erc721_token.symbol();
 
-    assert(token_name == "Cas on Starknet", 'wrong token name');
-    assert(token_symbol == "COS", 'wrong token symbol');
+    assert(token_name == "Codingcas on Starknet", 'wrong token name');
+    assert(token_symbol == "CCOS", 'wrong token symbol');
 }
 
 #[test]

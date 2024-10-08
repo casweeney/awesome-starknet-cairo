@@ -1,5 +1,4 @@
 use starknet::ContractAddress;
-pub mod erc721_interface;
 
 #[starknet::interface]
 pub trait ICasOnStark<TContractState> {
@@ -34,14 +33,11 @@ mod CasOnStark {
 
     #[constructor]
     fn constructor(ref self: ContractState, base_uri: ByteArray) {
-        self.erc721.initializer("Cas on Starknet", "COS", base_uri);
+        self.erc721.initializer("Codingcas on Starknet", "CCOS", base_uri);
     }
 
     #[abi(embed_v0)]
-    impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
-
-    #[abi(embed_v0)]
-    impl ERC721MetaImpl = ERC721Component::ERC721MetadataImpl<ContractState>;
+    impl ERC721Impl = ERC721Component::ERC721MixinImpl<ContractState>;
 
     impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
 
