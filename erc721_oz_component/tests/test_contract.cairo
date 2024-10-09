@@ -48,8 +48,8 @@ fn test_constructor() {
     let token_name = erc721_token.name();
     let token_symbol = erc721_token.symbol();
 
-    assert(token_name == "Codingcas on Starknet", 'wrong token name');
-    assert(token_symbol == "CCOS", 'wrong token symbol');
+    assert(token_name == "Make it Work", 'wrong token name');
+    assert(token_symbol == "MIW", 'wrong token symbol');
 }
 
 #[test]
