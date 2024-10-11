@@ -59,6 +59,8 @@ pub trait IERC1155<TContractState> {
     );
     fn isApprovedForAll(self: @TContractState, owner: ContractAddress, operator: ContractAddress) -> bool;
     fn setApprovalForAll(ref self: TContractState, operator: ContractAddress, approved: bool);
+
+    fn mint(ref self: TContractState, recipient: ContractAddress, token_ids: Span<u256>, values: Span<u256>);
 }
 
 fn deploy_contract(name: ByteArray) -> ContractAddress {
@@ -77,6 +79,8 @@ fn test_constructor() {
     let contract_address = deploy_contract("GameAsset");
 
     let erc1155_token = IERC1155Dispatcher { contract_address };
+
+    erc1155_token.mint();
 
     let token_uri = erc1155_token.uri();
 
