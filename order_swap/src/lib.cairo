@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+pub mod ierc20;
 
 #[starknet::interface]
 pub trait IOrderSwap<TContractState> {
@@ -8,8 +9,9 @@ pub trait IOrderSwap<TContractState> {
 
 #[starknet::contract]
 mod OrderSwap {
-    use starknet::ContractAddress;
+    use starknet::{ContractAddress, get_caller_address, get_contract_address};
     use core::starknet::storage::{Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess};
+    use order_swap::ierc20::{IERC20, IERC20Dispatcher, IERC20DispatcherTrait};
 
     #[storage]
     struct Storage {
@@ -30,7 +32,23 @@ mod OrderSwap {
     #[abi(embed_v0)]
     impl OrderSwapImpl of super::IOrderSwap<ContractState> {
         fn create_order(ref self: ContractState, from_token: ContractAddress, to_token: ContractAddress, amount_in: u256, amount_out: u256) {
-            
+            let caller = get_caller_address();
+            let this_contract = get_contract_address();
+            let token_from = IERC20Dispatcher { contract_address: from_token };
+            let order_id = self.last_order_id.read();
+
+            assert(token_from.balance_of(caller) >= amount_in, 'insufficient funds');
+            let transfer = token_from.transfer_from(caller, this_contract, amount_in);
+            assert(transfer, 'transfer failed');
+
+            self.orders.entry(order_id).order_owner.write(caller);
+            self.orders.entry(order_id).token_from.write(from_token);
+            self.orders.entry(order_id).token_to.write(to_token);
+            self.orders.entry(order_id).amount_in.write(amount_in);
+            self.orders.entry(order_id).amount_out.write(amount_out);
+            self.orders.entry(order_id).is_order_opened.write(true);
+
+            self.last_order_id.write(order_id);
         }
 
         fn execute_order(ref self: ContractState, order_id: u256) {
