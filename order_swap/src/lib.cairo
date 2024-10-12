@@ -1,10 +1,13 @@
 use starknet::ContractAddress;
 pub mod ierc20;
+pub mod from_token;
+pub mod to_token;
 
 #[starknet::interface]
 pub trait IOrderSwap<TContractState> {
     fn create_order(ref self: TContractState, from_token: ContractAddress, to_token: ContractAddress, amount_in: u256, amount_out: u256);
     fn execute_order(ref self: TContractState, order_id: u256);
+    fn get_orders_count(self: @TContractState) -> u256;
 }
 
 #[starknet::contract]
@@ -32,10 +35,12 @@ mod OrderSwap {
     #[abi(embed_v0)]
     impl OrderSwapImpl of super::IOrderSwap<ContractState> {
         fn create_order(ref self: ContractState, from_token: ContractAddress, to_token: ContractAddress, amount_in: u256, amount_out: u256) {
+            assert(from_token != to_token, 'detected same address');
+
             let caller = get_caller_address();
             let this_contract = get_contract_address();
             let token_from = IERC20Dispatcher { contract_address: from_token };
-            let order_id = self.last_order_id.read();
+            let order_id = self.last_order_id.read() + 1;
 
             assert(token_from.balance_of(caller) >= amount_in, 'insufficient funds');
             let transfer_in = token_from.transfer_from(caller, this_contract, amount_in);
@@ -81,6 +86,10 @@ mod OrderSwap {
 
             token_to.transfer(order.order_owner, order.amount_out);
             token_from.transfer(caller, order.amount_in);
+        }
+
+        fn get_orders_count(self: @ContractState) -> u256 {
+            self.last_order_id.read()
         }
     }
 }

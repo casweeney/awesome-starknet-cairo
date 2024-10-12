@@ -11,4 +11,10 @@ pub trait IERC20<TContractState> {
         ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
     ) -> bool;
     fn approve(ref self: TContractState, spender: ContractAddress, amount: u256) -> bool;
+
+    fn name(self: @TContractState) -> ByteArray;
+    fn symbol(self: @TContractState) -> ByteArray;
+    fn decimals(self: @TContractState) -> u8;
+
+    fn mint(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
 }

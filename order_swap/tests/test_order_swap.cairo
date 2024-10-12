@@ -1,45 +1,42 @@
 use starknet::ContractAddress;
 
-use snforge_std::{declare, ContractClassTrait};
+use snforge_std::{declare, ContractClassTrait, start_cheat_caller_address, stop_cheat_caller_address};
 
 use order_swap::{IOrderSwapDispatcher, IOrderSwapDispatcherTrait};
 use order_swap::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 fn deploy_contract(name: ByteArray) -> ContractAddress {
     let contract = declare(name).unwrap();
+
     let (contract_address, _) = contract.deploy(@ArrayTrait::new()).unwrap();
+    
     contract_address
 }
 
 #[test]
-fn test_increase_balance() {
-    let contract_address = deploy_contract("HelloStarknet");
+fn test_create_order() {
+    let swap_contract_address = deploy_contract("OrderSwap");
+    let from_token_contract_address = deploy_contract("FromToken");
+    let to_token_contract_address = deploy_contract("ToToken");
 
-    let dispatcher = IHelloStarknetDispatcher { contract_address };
+    let swap_contract = IOrderSwapDispatcher { contract_address: swap_contract_address };
+    let from_token = IERC20Dispatcher { contract_address: from_token_contract_address };
 
-    let balance_before = dispatcher.get_balance();
-    assert(balance_before == 0, 'Invalid balance');
 
-    dispatcher.increase_balance(42);
+    let caller: ContractAddress = starknet::contract_address_const::<0x123456789>();
+    let mint_amount: u256 = 10000_u256;
+    from_token.mint(caller, mint_amount);
+    assert(from_token.balance_of(caller) == mint_amount, 'Invalid balance');
 
-    let balance_after = dispatcher.get_balance();
-    assert(balance_after == 42, 'Invalid balance');
-}
+    start_cheat_caller_address(from_token_contract_address, caller);
+    from_token.approve(swap_contract_address, mint_amount);
+    stop_cheat_caller_address(from_token_contract_address);
 
-#[test]
-#[feature("safe_dispatcher")]
-fn test_cannot_increase_balance_with_zero_value() {
-    let contract_address = deploy_contract("HelloStarknet");
+    start_cheat_caller_address(swap_contract_address, caller);
+    let amount_in: u256 = 100_u256;
+    let amount_out: u256 = 200_u256;
+    swap_contract.create_order(from_token_contract_address, to_token_contract_address, amount_in, amount_out);
+    stop_cheat_caller_address(swap_contract_address);
 
-    let safe_dispatcher = IHelloStarknetSafeDispatcher { contract_address };
-
-    let balance_before = safe_dispatcher.get_balance().unwrap();
-    assert(balance_before == 0, 'Invalid balance');
-
-    match safe_dispatcher.increase_balance(0) {
-        Result::Ok(_) => core::panic_with_felt252('Should have panicked'),
-        Result::Err(panic_data) => {
-            assert(*panic_data.at(0) == 'Amount cannot be 0', *panic_data.at(0));
-        }
-    };
+    assert(swap_contract.get_orders_count() == 1, 'order creation failed');
 }
