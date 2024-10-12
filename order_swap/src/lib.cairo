@@ -38,8 +38,8 @@ mod OrderSwap {
             let order_id = self.last_order_id.read();
 
             assert(token_from.balance_of(caller) >= amount_in, 'insufficient funds');
-            let transfer = token_from.transfer_from(caller, this_contract, amount_in);
-            assert(transfer, 'transfer failed');
+            let transfer_in = token_from.transfer_from(caller, this_contract, amount_in);
+            assert(transfer_in, 'transfer failed');
 
             self.orders.entry(order_id).order_owner.write(caller);
             self.orders.entry(order_id).token_from.write(from_token);
@@ -52,7 +52,22 @@ mod OrderSwap {
         }
 
         fn execute_order(ref self: ContractState, order_id: u256) {
+            let order = self.orders.entry(order_id).read();
 
+            let caller = get_caller_address();
+            let this_contract = get_contract_address();
+
+            let token_to = IERC20Dispatcher{ contract_address: order.token_to };
+            let token_from = IERC20Dispatcher{ contract_address: order.token_from };
+
+            assert(token_to.balance_of(caller) >= order.amount_out, 'insufficient funds');
+            let transfer_in = token_to.transfer_from(caller, this_contract, order.amount_out);
+            assert(transfer_in, 'tranfer in failed');
+
+            self.orders.entry(order_id).is_order_opened.write(false);
+
+            token_to.transfer(order.order_owner, order.amount_out);
+            token_from.transfer(caller, order.amount_in);
         }
     }
 }
