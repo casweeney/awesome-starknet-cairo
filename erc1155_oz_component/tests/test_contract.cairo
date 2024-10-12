@@ -13,37 +13,44 @@ fn deploy_contract(name: ByteArray) -> ContractAddress {
     contract_address
 }
 
-// #[test]
-// fn test_constructor() {
-//     let contract_address = deploy_contract("GameAsset");
+fn deploy_mock_receiver(name: ByteArray) -> ContractAddress {
+    let contract = declare(name).unwrap();
 
-//     let erc1155_token = IERC1155Dispatcher { contract_address };
+    let (contract_address, _) = contract.deploy(@ArrayTrait::new()).unwrap();
+    
+    contract_address
+}
 
-//     assert(1 == 1, 'got here');
+#[test]
+fn test_constructor() {
+    let contract_address = deploy_contract("GameAsset");
 
-//     let recipient: ContractAddress = starknet::contract_address_const::<0x123456789>();
+    let erc1155_token = IERC1155Dispatcher { contract_address };
 
-//     let token_ids = array![1_u256, 2_u256, 3_u256].span();
-//     let values = array![10_u256, 20_u256, 30_u256].span();
+    let recipient = deploy_mock_receiver("MockERC1155Receiver");
 
-//     erc1155_token.mint(recipient, token_ids, values);
+    let token_ids = array![1_u256].span();
+    let values = array![10_u256].span();
 
-//     let token_uri = erc1155_token.uri(1_u256);
-//     assert(token_uri == "https://dummy_uri.com/your_id", 'wrong token uri');
-// }
+    erc1155_token.mint(recipient, token_ids, values);
+
+    let token_uri = erc1155_token.uri(1_u256);
+    
+    assert(token_uri == "https://dummy_uri.com/your_id", 'wrong token uri');
+}
 
 #[test]
 fn test_mint() {
     let contract_address = deploy_contract("GameAsset");
     
     let game_asset = IERC1155Dispatcher { contract_address };
-    
-    let recipient: ContractAddress = starknet::contract_address_const::<0x123456789>();
+
+    let recipient = deploy_mock_receiver("MockERC1155Receiver");
+
     let token_ids = array![1_u256, 2_u256, 3_u256].span();
     let values = array![10_u256, 20_u256, 30_u256].span();
     
     game_asset.mint(recipient, token_ids, values);
-    
 
     assert(game_asset.balance_of(recipient, 1_u256) == 10_u256, 'Wrong balance for token 1');
     assert(game_asset.balance_of(recipient, 2_u256) == 20_u256, 'Wrong balance for token 2');
