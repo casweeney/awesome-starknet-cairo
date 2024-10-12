@@ -1,5 +1,6 @@
 use starknet::ContractAddress;
 pub mod ierc1155;
+pub mod mock_1155_receiver;
 
 #[starknet::interface]
 pub trait IGameAsset<TContractState> {
