@@ -1,67 +1,6 @@
 use starknet::ContractAddress;
-
 use snforge_std::{declare, ContractClassTrait};
-
-#[starknet::interface]
-pub trait IERC1155<TContractState> {
-    // IERC1155
-    fn balance_of(self: @TContractState, account: ContractAddress, token_id: u256) -> u256;
-    fn balance_of_batch(
-        self: @TContractState, accounts: Span<ContractAddress>, token_ids: Span<u256>
-    ) -> Span<u256>;
-    fn safe_transfer_from(
-        ref self: TContractState,
-        from: ContractAddress,
-        to: ContractAddress,
-        token_id: u256,
-        value: u256,
-        data: Span<felt252>
-    );
-    fn safe_batch_transfer_from(
-        ref self: TContractState,
-        from: ContractAddress,
-        to: ContractAddress,
-        token_ids: Span<u256>,
-        values: Span<u256>,
-        data: Span<felt252>
-    );
-    fn is_approved_for_all(
-        self: @TContractState, owner: ContractAddress, operator: ContractAddress
-    ) -> bool;
-    fn set_approval_for_all(ref self: TContractState, operator: ContractAddress, approved: bool);
-
-    // ISRC5
-    fn supports_interface(self: @TContractState, interface_id: felt252) -> bool;
-
-    // IERC1155MetadataURI
-    fn uri(self: @TContractState, token_id: u256) -> ByteArray;
-
-    // IERC1155Camel
-    fn balanceOf(self: @TContractState, account: ContractAddress, tokenId: u256) -> u256;
-    fn balanceOfBatch(
-        self: @TContractState, accounts: Span<ContractAddress>, tokenIds: Span<u256>
-    ) -> Span<u256>;
-    fn safeTransferFrom(
-        ref self: TContractState,
-        from: ContractAddress,
-        to: ContractAddress,
-        tokenId: u256,
-        value: u256,
-        data: Span<felt252>
-    );
-    fn safeBatchTransferFrom(
-        ref self: TContractState,
-        from: ContractAddress,
-        to: ContractAddress,
-        tokenIds: Span<u256>,
-        values: Span<u256>,
-        data: Span<felt252>
-    );
-    fn isApprovedForAll(self: @TContractState, owner: ContractAddress, operator: ContractAddress) -> bool;
-    fn setApprovalForAll(ref self: TContractState, operator: ContractAddress, approved: bool);
-
-    fn mint(ref self: TContractState, recipient: ContractAddress, token_ids: Span<u256>, values: Span<u256>);
-}
+use erc1155_oz_component::ierc1155::{IERC1155Dispatcher, IERC1155DispatcherTrait};
 
 fn deploy_contract(name: ByteArray) -> ContractAddress {
     let token_uri: ByteArray = "https://dummy_uri.com/your_id";
@@ -74,15 +13,39 @@ fn deploy_contract(name: ByteArray) -> ContractAddress {
     contract_address
 }
 
+// #[test]
+// fn test_constructor() {
+//     let contract_address = deploy_contract("GameAsset");
+
+//     let erc1155_token = IERC1155Dispatcher { contract_address };
+
+//     assert(1 == 1, 'got here');
+
+//     let recipient: ContractAddress = starknet::contract_address_const::<0x123456789>();
+
+//     let token_ids = array![1_u256, 2_u256, 3_u256].span();
+//     let values = array![10_u256, 20_u256, 30_u256].span();
+
+//     erc1155_token.mint(recipient, token_ids, values);
+
+//     let token_uri = erc1155_token.uri(1_u256);
+//     assert(token_uri == "https://dummy_uri.com/your_id", 'wrong token uri');
+// }
+
 #[test]
-fn test_constructor() {
+fn test_mint() {
     let contract_address = deploy_contract("GameAsset");
+    
+    let game_asset = IERC1155Dispatcher { contract_address };
+    
+    let recipient: ContractAddress = starknet::contract_address_const::<0x123456789>();
+    let token_ids = array![1_u256, 2_u256, 3_u256].span();
+    let values = array![10_u256, 20_u256, 30_u256].span();
+    
+    game_asset.mint(recipient, token_ids, values);
+    
 
-    let erc1155_token = IERC1155Dispatcher { contract_address };
-
-    erc1155_token.mint();
-
-    let token_uri = erc1155_token.uri();
-
-    assert(token_uri == "https://dummy_uri.com/your_id", 'wrong token uri');
+    assert(game_asset.balance_of(recipient, 1_u256) == 10_u256, 'Wrong balance for token 1');
+    assert(game_asset.balance_of(recipient, 2_u256) == 20_u256, 'Wrong balance for token 2');
+    assert(game_asset.balance_of(recipient, 3_u256) == 30_u256, 'Wrong balance for token 3');
 }

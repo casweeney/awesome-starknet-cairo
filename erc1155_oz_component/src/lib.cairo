@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+pub mod ierc1155;
 
 #[starknet::interface]
 pub trait IGameAsset<TContractState> {
