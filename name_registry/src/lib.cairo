@@ -12,7 +12,7 @@ pub trait INameRegistry<TContractState> {
 #[starknet::contract]
 mod NameRegistry {
     use starknet::event::EventEmitter;
-use core::starknet::{ContractAddress, get_caller_address};
+    use core::starknet::{ContractAddress, get_caller_address};
     use core::starknet::storage::{Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess};
 
     #[storage]
