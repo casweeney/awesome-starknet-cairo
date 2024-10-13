@@ -1,5 +1,6 @@
 use starknet::ContractAddress;
 pub mod ierc20;
+pub mod mock_erc20;
 
 #[starknet::interface]
 pub trait IEscrow<TContractState> {
@@ -106,23 +107,50 @@ mod Escrow {
         }
 
         fn refund_user(ref self: ContractState, transaction_id: u256) {
+            let transaction = self.transactions.entry(transaction_id).read();
 
+            let total_refund_amount = transaction.amount + transaction.fee;
+
+            IERC20Dispatcher { contract_address: transaction.token }.transfer(get_caller_address(), total_refund_amount);
+
+            self.transactions.entry(transaction_id).payment_status.write(PaymentStatus::Refunded);
         }
 
         fn verify_transaction(ref self: ContractState, transaction_id: u256) {
+            let caller = get_caller_address();
 
+            assert!(caller == self.admin.read(), "only admin required");
+
+            self.transactions.entry(transaction_id).is_verified.write(true);
         }
 
         fn withdraw(ref self: ContractState, token: ContractAddress) {
+            let caller = get_caller_address();
 
+            assert!(caller == self.admin.read(), "only admin required");
+
+            let token_contract = IERC20Dispatcher { contract_address: token };
+
+            token_contract.transfer(self.treasury.read(), self.total_amount.read());
+            token_contract.transfer(self.fee_treasury.read(), self.total_fee.read());
         }
 
         fn change_admin(ref self: ContractState, new_admin: ContractAddress) {
+            let caller = get_caller_address();
 
+            assert!(caller == self.admin.read(), "only admin required");
+
+            self.admin.write(new_admin);
         }
 
         fn get_all_transaction(self: @ContractState) -> Array<Transaction> {
+            let mut transaction_array = array![];
 
+            for index in 0..self.transaction_record.len() {
+                transaction_array.append(self.transaction_record.at(index).read());
+            };
+
+            transaction_array
         }
     }
 }
