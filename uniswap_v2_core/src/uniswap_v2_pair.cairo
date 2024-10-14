@@ -49,18 +49,18 @@ mod UniswapV2Pair {
     }
 
     #[generate_trait]
-    impl UniswapV2InternalImpl of PrivateTrait {
-        fn update(balance0: u256, balance1: u256, reserve0: u256, reserve1: u256) {
+    impl InternalImpl of InternalTrait {
+        fn update(ref self: ContractState, balance0: u256, balance1: u256, reserve0: u256, reserve1: u256) {
 
         }
 
-        fn mint_fee(reserve0: u256, reserve1: u256) -> bool {
+        fn mint_fee(ref self: ContractState, reserve0: u256, reserve1: u256) -> bool {
 
             true
         }
 
-        fn safe_transfer(token: ContractAddress, to: ContractAddress, value: u256) {
-            
+        fn safe_transfer(ref self: ContractState, token: ContractAddress, to: ContractAddress, value: u256) {
+
         }
     }
 }
