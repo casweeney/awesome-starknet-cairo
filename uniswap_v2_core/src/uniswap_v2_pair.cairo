@@ -2,6 +2,7 @@
 mod UniswapV2Pair {
     use starknet::ContractAddress;
     use uniswap_v2_core::interfaces::iuniswap_v2_pair::IUniswapV2Pair;
+    use uniswap_v2_core::uniswap_v2_erc20::UniswapV2ERC20;
 
     #[storage]
     pub struct Storage {

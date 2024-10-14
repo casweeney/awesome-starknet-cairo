@@ -1,5 +1,5 @@
 #[starknet::contract]
-mod UniswapV2ERC20 {
+pub mod UniswapV2ERC20 {
     use uniswap_v2_core::interfaces::iuniswap_v2_erc20::IUniswapV2ERC20;
     use starknet::{ContractAddress, get_caller_address};
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry};
