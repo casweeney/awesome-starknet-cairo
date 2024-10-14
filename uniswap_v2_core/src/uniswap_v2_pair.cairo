@@ -3,6 +3,8 @@ mod UniswapV2Pair {
     use starknet::ContractAddress;
     use uniswap_v2_core::interfaces::iuniswap_v2_pair::IUniswapV2Pair;
     use uniswap_v2_core::uniswap_v2_erc20::UniswapV2ERC20;
+    use uniswap_v2_core::interfaces::ierc20::IERC20;
+    use uniswap_v2_core::interfaces::iuniswap_v2_factory::IUniswapV2Factory;
 
     #[storage]
     pub struct Storage {
@@ -38,7 +40,7 @@ mod UniswapV2Pair {
         }
 
         fn burn(ref self: ContractState, to: ContractAddress) -> (u256, u256) {
-
+            
             (2, 3)
         }
 
