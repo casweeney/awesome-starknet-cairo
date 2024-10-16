@@ -1,6 +1,6 @@
 # Awesome Starknet Cairo
-This repository contains different starknet cairo smart contracts properly written an tested, which you can easily checkout for project ideas.
+This repository contains different starknet cairo smart contracts properly written and tested, which you can easily checkout for project ideas.
 
-I decided pack different projects in one repository so that I don't flood my GitHub profile with a lot of ----- figure it out.
+Using the projects here will get you up with speed to build and test on Starknet.
 
 ### CHEERS.
