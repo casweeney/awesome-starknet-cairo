@@ -143,6 +143,18 @@ use multisig_wallet::interfaces::imultisig_wallet::IMultisigWallet;
                 }
             );
         }
+
+        fn quorum(self: @ContractState) -> u256 {
+            self.quorum.read()
+        }
+
+        fn no_of_valid_signers(self: @ContractState) -> u256 {
+            self.no_of_valid_signers.read()
+        }
+
+        fn tx_count(self: @ContractState) -> u256 {
+            self.tx_count.read()
+        }
     }
 
     #[generate_trait]
