@@ -8,7 +8,7 @@ pub trait IMultisigWallet<TContractState> {
 
 #[starknet::contract]
 mod HelloStarknet {
-    use starknet::ContractAddress;
+    use starknet::{ContractAddress, contract_address_const};
     use core::starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, 
         Map, StoragePathEntry,
@@ -39,8 +39,20 @@ mod HelloStarknet {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState) {
+    fn constructor(ref self: ContractState, quorum: u256, valid_signers: Array<ContractAddress>) {
+        assert!(quorum > 1, "few quorum");
+        assert!(valid_signers.len().try_into().unwrap() >= quorum, "valid signers less than quorum");
 
+        for i in 0..valid_signers.len() {
+            let signer = *valid_signers.at(i);
+
+            assert!(signer != self.zero_address(), "zero address not allowed");
+
+            self.is_valid_signer.entry(signer).write(true);
+        };
+
+        self.quorum.write(quorum);
+        self.no_of_valid_signers.write(valid_signers.len().try_into().unwrap());
     }
 
     #[abi(embed_v0)]
@@ -51,6 +63,13 @@ mod HelloStarknet {
 
         fn approve_transaction(ref self: ContractState, tx_id: u256) {
 
+        }
+    }
+
+    #[generate_trait]
+    impl InternalImpl of InternalTrait {
+        fn zero_address(self: @ContractState) -> ContractAddress {
+            contract_address_const::<0>()
         }
     }
 }
