@@ -1,6 +1,7 @@
 #[starknet::contract]
 mod HelloStarknet {
-    use multisig_wallet::interfaces::imultisig_wallet::IMultisigWallet;
+    use starknet::event::EventEmitter;
+use multisig_wallet::interfaces::imultisig_wallet::IMultisigWallet;
     use multisig_wallet::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{ContractAddress, contract_address_const, get_caller_address, get_contract_address, get_block_timestamp};
     use core::starknet::storage::{
@@ -30,6 +31,27 @@ mod HelloStarknet {
         pub timestamp: u256,
         pub no_of_approvals: u256,
         pub token_address: ContractAddress,
+    }
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    pub enum Event {
+        TransferInitiated: TransferInitiated,
+        TransactionApproved: TransactionApproved,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct TransferInitiated {
+        pub initiator: ContractAddress,
+        pub token: ContractAddress,
+        pub recipient: ContractAddress,
+        pub amount: u256,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct TransactionApproved {
+        pub id: u256,
+        pub approver: ContractAddress,
     }
 
     #[constructor]
@@ -82,10 +104,44 @@ mod HelloStarknet {
 
             let prev_tx_count = self.tx_count.read();
             self.tx_count.write(prev_tx_count + 1);
+
+            self.emit(
+                TransferInitiated {
+                    initiator: caller,
+                    token: token_address,
+                    recipient,
+                    amount,
+                }
+            );
         }
 
         fn approve_transaction(ref self: ContractState, tx_id: u256) {
+            let caller = get_caller_address();
 
+            assert!(self.is_valid_signer.entry(caller).read(), "invalid signer");
+            assert!(self.has_signed.entry((caller, tx_id)).read() == false, "can't sign tiwce");
+            assert!(self.transactions.entry(tx_id).is_completed.read() == false, "transaction already completed");
+
+            self.has_signed.entry((caller, tx_id)).write(true);
+
+            let transaction = self.transactions.entry(tx_id).read();
+
+            self.transactions.entry(tx_id).no_of_approvals.write(transaction.no_of_approvals + 1);
+            self.transaction_signers.entry(tx_id).append().write(caller);
+
+            let current_no_of_approvals = self.transactions.entry(tx_id).no_of_approvals.read();
+
+            if current_no_of_approvals == self.quorum.read() {
+                self.transactions.entry(tx_id).is_completed.write(true);
+                IERC20Dispatcher {contract_address: transaction.token_address}.transfer(transaction.recipient, transaction.amount);
+            }
+
+            self.emit(
+                TransactionApproved {
+                    id: tx_id,
+                    approver: caller
+                }
+            );
         }
     }
 
