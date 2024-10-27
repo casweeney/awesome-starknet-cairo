@@ -1,25 +1,56 @@
+use starknet::ContractAddress;
+
 #[starknet::interface]
-pub trait IHelloStarknet<TContractState> {
-    fn increase_balance(ref self: TContractState, amount: felt252);
-    fn get_balance(self: @TContractState) -> felt252;
+pub trait IMultisigWallet<TContractState> {
+    fn init_transfer(ref self: TContractState, recipient: ContractAddress, amount: u256);
+    fn approve_transaction(ref self: TContractState, tx_id: u256);
 }
 
 #[starknet::contract]
 mod HelloStarknet {
+    use starknet::ContractAddress;
+    use core::starknet::storage::{
+        StoragePointerReadAccess, StoragePointerWriteAccess, 
+        Map, StoragePathEntry,
+        MutableVecTrait, Vec, VecTrait
+    };
+
     #[storage]
     struct Storage {
-        balance: felt252, 
+        quorum: u256,
+        no_of_valid_signers: u256,
+        tx_count: u256,
+        is_valid_signer: Map<ContractAddress, bool>,
+        transactions: Map<u256, Transaction>,
+        has_signed: Map<(ContractAddress, u256), bool>,
+        transaction_signers: Map<u256, Vec<ContractAddress>>
+    }
+
+    #[derive(Copy, Drop, Serde, starknet::Store)]
+    pub struct Transaction {
+        pub id: u256,
+        pub amount: u256,
+        pub initiator: ContractAddress,
+        pub recipient: ContractAddress,
+        pub is_completed: bool,
+        pub timestamp: u256,
+        pub no_of_approval: u256,
+        pub token_address: ContractAddress,
+    }
+
+    #[constructor]
+    fn constructor(ref self: ContractState) {
+
     }
 
     #[abi(embed_v0)]
-    impl HelloStarknetImpl of super::IHelloStarknet<ContractState> {
-        fn increase_balance(ref self: ContractState, amount: felt252) {
-            assert(amount != 0, 'Amount cannot be 0');
-            self.balance.write(self.balance.read() + amount);
+    impl MultisigWallet of super::IMultisigWallet<ContractState> {
+        fn init_transfer(ref self: ContractState, recipient: ContractAddress, amount: u256) {
+
         }
 
-        fn get_balance(self: @ContractState) -> felt252 {
-            self.balance.read()
+        fn approve_transaction(ref self: ContractState, tx_id: u256) {
+
         }
     }
 }
