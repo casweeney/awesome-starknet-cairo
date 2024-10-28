@@ -1,13 +1,13 @@
 #[starknet::contract]
-mod HelloStarknet {
+mod MultisigWallet {
     use starknet::event::EventEmitter;
-use multisig_wallet::interfaces::imultisig_wallet::IMultisigWallet;
+    use multisig_wallet::interfaces::imultisig_wallet::IMultisigWallet;
     use multisig_wallet::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{ContractAddress, contract_address_const, get_caller_address, get_contract_address, get_block_timestamp};
     use core::starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, 
         Map, StoragePathEntry,
-        MutableVecTrait, Vec, VecTrait
+        MutableVecTrait, Vec
     };
 
     #[storage]
@@ -72,7 +72,7 @@ use multisig_wallet::interfaces::imultisig_wallet::IMultisigWallet;
     }
 
     #[abi(embed_v0)]
-    impl MultisigWallet of IMultisigWallet<ContractState> {
+    impl MultisigWalletImpl of IMultisigWallet<ContractState> {
         fn init_transfer(ref self: ContractState, token_address: ContractAddress, recipient: ContractAddress, amount: u256) {
             let caller = get_caller_address();
             let this_contract = get_contract_address();
