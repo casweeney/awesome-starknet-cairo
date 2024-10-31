@@ -1,9 +1,9 @@
 use starknet::ContractAddress;
 
-use snforge_std::{declare, ContractClassTrait, DeclareResultTrait};
+use snforge_std::{declare, ContractClassTrait, DeclareResultTrait, start_cheat_caller_address, stop_cheat_caller_address};
 
 use multisig_wallet::interfaces::imultisig_wallet::{IMultisigWalletDispatcher, IMultisigWalletDispatcherTrait};
-// use multisig_wallet::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
+use multisig_wallet::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 fn deploy_mock_token() -> ContractAddress {
     let mut constructor_calldata = ArrayTrait::new();
@@ -40,4 +40,31 @@ fn test_constructor() {
 
     assert!(multisig_wallet.quorum() == 3, "wrong quorum");
     assert!(multisig_wallet.no_of_valid_signers() == 3, "wrong quorum");
+}
+
+#[test]
+fn test_init_transfer() {
+    let multisi_contract_address = setup_multisig_wallet();
+    let multisig_wallet = IMultisigWalletDispatcher { contract_address: multisi_contract_address };
+
+    let mock_token_address = deploy_mock_token();
+    let mock_token = IERC20Dispatcher {contract_address: mock_token_address};
+
+    let mint_amount: u256 = 1000000_u256;
+
+    mock_token.mint(multisi_contract_address, mint_amount);
+
+    assert!(mock_token.balance_of(multisi_contract_address) == mint_amount, "wrong token balance");
+
+    let signer1: ContractAddress = starknet::contract_address_const::<0x123456789>();
+    let recipient: ContractAddress = starknet::contract_address_const::<0x003456700>();
+    let trf_amount: u256 = 100_u256;
+
+    start_cheat_caller_address(multisi_contract_address, signer1);
+
+    multisig_wallet.init_transfer(mock_token_address, recipient, trf_amount);
+
+    assert!(multisig_wallet.tx_count() == 1, "wrong transaction count");
+
+    stop_cheat_caller_address(multisi_contract_address);
 }

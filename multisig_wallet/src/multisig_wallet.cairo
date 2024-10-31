@@ -82,8 +82,7 @@ mod MultisigWallet {
             assert!(token_address != self.zero_address(), "token can't be zero address");
 
             let token = IERC20Dispatcher{contract_address: token_address};
-            let transfer = token.transfer_from(caller, this_contract, amount);
-            assert!(transfer, "transfer failed");
+            assert!(token.balance_of(this_contract) >= amount, "insufiicient funds");
 
             let tx_id = self.tx_count.read() + 1;
 
