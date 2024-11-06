@@ -1,18 +1,18 @@
 #[starknet::interface]
-pub trait IHelloStarknet<TContractState> {
+pub trait ILottery<TContractState> {
     fn increase_balance(ref self: TContractState, amount: felt252);
     fn get_balance(self: @TContractState) -> felt252;
 }
 
 #[starknet::contract]
-mod HelloStarknet {
+mod Lottery {
     #[storage]
     struct Storage {
         balance: felt252, 
     }
 
     #[abi(embed_v0)]
-    impl HelloStarknetImpl of super::IHelloStarknet<ContractState> {
+    impl LotteryImpl of super::ILottery<ContractState> {
         fn increase_balance(ref self: ContractState, amount: felt252) {
             assert(amount != 0, 'Amount cannot be 0');
             self.balance.write(self.balance.read() + amount);
