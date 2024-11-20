@@ -3,6 +3,7 @@ mod Auction {
     use starknet::event::EventEmitter;
 use crate::interfaces::iauction::IAuction;
     use crate::interfaces::ierc721::{IERC721Dispatcher, IERC721DispatcherTrait};
+    use crate::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{ContractAddress, get_caller_address, get_contract_address, get_block_timestamp, contract_address_const};
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry};
 
@@ -11,6 +12,7 @@ use crate::interfaces::iauction::IAuction;
 
     #[storage]
     struct Storage {
+        accepted_erc20_token: ContractAddress,
         nft: ContractAddress,
         nft_id: u256,
         seller: ContractAddress,
@@ -53,8 +55,9 @@ use crate::interfaces::iauction::IAuction;
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, nft_address: ContractAddress, nft_id: u256, starting_bid: u256) {
+    fn constructor(ref self: ContractState, nft_address: ContractAddress, accepted_erc20_token: ContractAddress, nft_id: u256, starting_bid: u256) {
         let caller = get_caller_address();
+        self.accepted_erc20_token.write(accepted_erc20_token);
         self.nft.write(nft_address);
         self.nft_id.write(nft_id);
         self.seller.write(caller);
@@ -100,7 +103,14 @@ use crate::interfaces::iauction::IAuction;
         }
 
         fn withdraw(ref self: ContractState) {
-
+            let caller = get_caller_address();
+            let balance = self.bids.entry(caller).read();
+            self.bids.entry(caller).write(0);
+            IERC20Dispatcher { contract_address: self.accepted_erc20_token.read() }.transfer(caller, balance);
+            self.emit(Withdraw {
+                bidder: caller,
+                amount: balance
+            });
         }
 
         fn end(ref self: ContractState) {
