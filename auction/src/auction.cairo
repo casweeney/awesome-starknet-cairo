@@ -134,36 +134,40 @@ use crate::interfaces::iauction::IAuction;
             });
         }
 
-        fn nft(self: @ContractState) -> ContractAddress {
+        fn accepted_erc20_token(self: @ContractState) -> ContractAddress {
+            self.accepted_erc20_token.read()
+        }
 
+        fn nft(self: @ContractState) -> ContractAddress {
+            self.nft.read()
         }
 
         fn nft_id(self: @ContractState) -> u256 {
-
+            self.nft_id.read()
         }
 
         fn seller(self: @ContractState) -> ContractAddress {
-
+            self.seller.read()
         }
 
         fn end_at(self: @ContractState) -> u256 {
-
+            self.end_at.read()
         }
 
         fn started(self: @ContractState) -> bool {
-
+            self.started.read()
         }
 
         fn ended(self: @ContractState) -> bool {
-
+            self.ended.read()
         }
 
         fn highest_bidder(self: @ContractState) -> ContractAddress {
-
+            self.highest_bidder.read()
         }
 
         fn highest_bid(self: @ContractState) -> u256 {
-
+            self.highest_bid.read()
         }
     }
 

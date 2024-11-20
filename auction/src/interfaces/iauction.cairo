@@ -7,6 +7,7 @@ pub trait IAuction<TContractState> {
     fn withdraw(ref self: TContractState);
     fn end(ref self: TContractState);
 
+    fn accepted_erc20_token(self: @TContractState) -> ContractAddress;
     fn nft(self: @TContractState) -> ContractAddress;
     fn nft_id(self: @TContractState) -> u256;
     fn seller(self: @TContractState) -> ContractAddress;
