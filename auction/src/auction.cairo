@@ -2,7 +2,7 @@
 mod Auction {
     use crate::interfaces::iauction::IAuction;
     use crate::interfaces::ierc721::{IERC721Dispatcher, IERC721DispatcherTrait};
-    use starknet::ContractAddress;
+    use starknet::{ContractAddress, get_caller_address};
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry};
 
     #[storage]
@@ -20,7 +20,11 @@ mod Auction {
 
     #[constructor]
     fn constructor(ref self: ContractState, nft_address: ContractAddress, nft_id: u256, starting_bid: u256) {
-
+        let caller = get_caller_address();
+        self.nft.write(nft_address);
+        self.nft_id.write(nft_id);
+        self.seller.write(caller);
+        self.highest_bid.write(starting_bid);
     }
 
     #[abi(embed_v0)]
