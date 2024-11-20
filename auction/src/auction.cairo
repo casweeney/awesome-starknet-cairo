@@ -114,7 +114,24 @@ use crate::interfaces::iauction::IAuction;
         }
 
         fn end(ref self: ContractState) {
+            assert(self.started.read(), 'Not Started');
+            assert(get_block_timestamp().try_into().unwrap() >= self.end_at.read(), 'Not Ended');
+            assert(self.ended.read() == false, 'Ended');
 
+            self.ended.write(true);
+
+            let nft = IERC721Dispatcher { contract_address: self.nft.read() };
+
+            if self.highest_bidder.read() != self.zero_address() {
+                nft.transfer_from(get_contract_address(), self.highest_bidder.read(), self.nft_id.read());
+            } else {
+                nft.transfer_from(get_contract_address(), self.seller.read(), self.nft_id.read());
+            }
+
+            self.emit(End {
+                winner: self.highest_bidder.read(),
+                amount: self.highest_bid.read()
+            });
         }
 
         fn nft(self: @ContractState) -> ContractAddress {
