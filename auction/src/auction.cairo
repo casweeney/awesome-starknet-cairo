@@ -3,7 +3,7 @@ mod Auction {
     use starknet::event::EventEmitter;
 use crate::interfaces::iauction::IAuction;
     use crate::interfaces::ierc721::{IERC721Dispatcher, IERC721DispatcherTrait};
-    use starknet::{ContractAddress, get_caller_address, get_contract_address, get_block_timestamp};
+    use starknet::{ContractAddress, get_caller_address, get_contract_address, get_block_timestamp, contract_address_const};
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry};
 
     const DAY_IN_SECONDS: u64 = 86400;
@@ -80,7 +80,23 @@ use crate::interfaces::iauction::IAuction;
         }
 
         fn bid(ref self: ContractState, amount: u256) {
+            assert(self.started.read(), 'Not Started');
+            assert(get_block_timestamp().try_into().unwrap() < self.end_at.read(), 'Ended');
+            assert(amount > self.highest_bid.read(), 'Amount < highest');
 
+            if self.highest_bidder.read() != self.zero_address() {
+                let prev_bid = self.bids.entry(self.highest_bidder.read()).read();
+                self.bids.entry(self.highest_bidder.read()).write(prev_bid + self.highest_bid.read());
+            }
+
+            let caller = get_caller_address();
+            self.highest_bidder.write(caller);
+            self.highest_bid.write(amount);
+
+            self.emit(Bid{
+                sender: caller,
+                amount
+            });
         }
 
         fn withdraw(ref self: ContractState) {
@@ -121,6 +137,13 @@ use crate::interfaces::iauction::IAuction;
 
         fn highest_bid(self: @ContractState) -> u256 {
 
+        }
+    }
+
+    #[generate_trait]
+    impl InternalImpl of InternalTrait {
+        fn zero_address(self: @ContractState) -> ContractAddress {
+            contract_address_const::<0>()
         }
     }
 }
