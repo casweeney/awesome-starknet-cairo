@@ -1,7 +1,7 @@
 #[starknet::contract]
 mod VotingFactory {
     use crate::interfaces::ivoting_factory::IVotingFactory;
-    use starknet::ContractAddress;
+    use starknet::{ContractAddress, get_caller_address, contract_address_const};
     use core::starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, 
         Map, StoragePathEntry,
@@ -35,7 +35,9 @@ mod VotingFactory {
         }
 
         fn get_voting_polls(self: @ContractState) -> Array<ContractAddress> {
+            let mut polls = array![contract_address_const::<0>()];
 
+            polls
         }
 
         fn total_voting_poll(self: @ContractState) -> u256 {
