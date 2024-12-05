@@ -123,11 +123,11 @@ fn test_notify_reward_amount() {
     assert!(staking_token.balance_of(owner) == mint_amount, "wrong staking token balance");
     assert!(reward_token.balance_of(owner) == mint_amount, "wrong reward token balance");
 
-    // Transfer reward token into staking contract
+    // Approve staking contract to spend reward tokens
     start_cheat_caller_address(reward_token_address, owner);
-    reward_token.transfer(staking_contract_address, mint_amount);
+    reward_token.approve(staking_contract_address, mint_amount);
     stop_cheat_caller_address(reward_token_address);
-    assert!(reward_token.balance_of(staking_contract_address) == mint_amount, "reward token transfer failed");
+    assert!(reward_token.allowance(owner, staking_contract_address) == mint_amount, "reward token approval failed");
 
     let duration: u256 = 1800_u256;
     
@@ -164,11 +164,11 @@ fn test_stake() {
     assert!(staking_token.balance_of(owner) == mint_amount, "wrong staking token balance");
     assert!(reward_token.balance_of(owner) == mint_amount, "wrong reward token balance");
 
-    // Transfer reward token into staking contract
+    // Approve staking contract to spend reward tokens
     start_cheat_caller_address(reward_token_address, owner);
-    reward_token.transfer(staking_contract_address, mint_amount);
+    reward_token.approve(staking_contract_address, mint_amount);
     stop_cheat_caller_address(reward_token_address);
-    assert!(reward_token.balance_of(staking_contract_address) == mint_amount, "reward token transfer failed");
+    assert!(reward_token.allowance(owner, staking_contract_address) == mint_amount, "reward token approval failed");
 
     // Approve staking contract to spend staking token.
     start_cheat_caller_address(staking_token_address, owner);
@@ -213,11 +213,11 @@ fn test_earned() {
     assert!(staking_token.balance_of(owner) == mint_amount, "wrong staking token balance");
     assert!(reward_token.balance_of(owner) == mint_amount, "wrong reward token balance");
 
-    // Transfer reward token into staking contract
+    // Approve staking contract to spend reward tokens
     start_cheat_caller_address(reward_token_address, owner);
-    reward_token.transfer(staking_contract_address, mint_amount);
+    reward_token.approve(staking_contract_address, mint_amount);
     stop_cheat_caller_address(reward_token_address);
-    assert!(reward_token.balance_of(staking_contract_address) == mint_amount, "reward token transfer failed");
+    assert!(reward_token.allowance(owner, staking_contract_address) == mint_amount, "reward token approval failed");
 
     // Approve staking contract to spend staking token.
     start_cheat_caller_address(staking_token_address, owner);
