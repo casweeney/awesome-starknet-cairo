@@ -7,8 +7,8 @@ use snforge_std::{
     start_cheat_block_timestamp_global, stop_cheat_block_timestamp_global
 };
 
-use synthetix_staking::interfaces::istaking_rewards::{IStakingRewardsDispatcher, IStakingRewardsDispatcherTrait};
-use synthetix_staking::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
+use staking_rewards::interfaces::istaking_rewards::{IStakingRewardsDispatcher, IStakingRewardsDispatcherTrait};
+use staking_rewards::interfaces::ierc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 const ONE_E18: u256 = 1000000000000000000_u256;
 
