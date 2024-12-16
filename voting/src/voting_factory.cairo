@@ -2,7 +2,7 @@
 mod VotingFactory {
     use crate::interfaces::ivoting_factory::IVotingFactory;
     use crate::interfaces::ivoting::{IVotingDispatcher, IVotingDispatcherTrait};
-    use starknet::{ContractAddress, syscalls::deploy_syscall, ClassHash, get_caller_address, get_contract_address};
+    use starknet::{ContractAddress, syscalls::deploy_syscall, ClassHash, get_contract_address};
     use core::starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, 
         Map, StoragePathEntry,
@@ -29,7 +29,7 @@ mod VotingFactory {
 
             self.voting_polls.entry(polls_count + 1).write(voting_poll_contract);
 
-            IVotingDispatcher{contract_address: voting_poll_contract}.create_poll(title, candidates);
+            IVotingDispatcher{ contract_address: voting_poll_contract }.create_poll(title, candidates);
         }
 
         fn get_voting_polls(self: @ContractState) -> Array<ContractAddress> {
