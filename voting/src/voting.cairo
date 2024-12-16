@@ -91,6 +91,8 @@ pub mod Voting {
                     winning_vote_count = candidate.vote_count;
                     winning_candidate = i;
                 }
+
+                i += 1;
             };
 
 
@@ -110,6 +112,8 @@ pub mod Voting {
             while i < self.candidates_count.read() + 1 {
                 let candidate = self.candidates.entry(i).read();
                 candidates.append(candidate);
+
+                i += 1;
             };
 
             candidates
