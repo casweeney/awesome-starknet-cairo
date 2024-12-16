@@ -2,10 +2,8 @@ use starknet::ContractAddress;
 
 use snforge_std::{declare, ContractClassTrait, DeclareResultTrait};
 
-use voting::IHelloStarknetSafeDispatcher;
-use voting::IHelloStarknetSafeDispatcherTrait;
-use voting::IHelloStarknetDispatcher;
-use voting::IHelloStarknetDispatcherTrait;
+use voting::interfaces::ivoting::{IVotingDispatcher, IVotingDispatcherTrait};
+use voting::interfaces::ivoting_factory::{IVotingFactoryDispatcher, IVotingFactoryDispatcherTrait};
 
 fn deploy_contract(name: ByteArray) -> ContractAddress {
     let contract = declare(name).unwrap().contract_class();
@@ -14,34 +12,15 @@ fn deploy_contract(name: ByteArray) -> ContractAddress {
 }
 
 #[test]
-fn test_increase_balance() {
-    let contract_address = deploy_contract("HelloStarknet");
+fn test_create_poll() {
+    let contract_address = deploy_contract("VotingFactory");
+    let factory_contract = IVotingFactoryDispatcher { contract_address };
 
-    let dispatcher = IHelloStarknetDispatcher { contract_address };
+    let voting_poll_clash = declare("Voting").unwrap().contract_class();
+    let title = "2027 Election";
+    let candidates: Array<ByteArray> = array!["Peter Obi", "Tinubu", "Atiku"];
 
-    let balance_before = dispatcher.get_balance();
-    assert(balance_before == 0, 'Invalid balance');
+    factory_contract.create_poll(*voting_poll_clash.class_hash, title, candidates);
 
-    dispatcher.increase_balance(42);
-
-    let balance_after = dispatcher.get_balance();
-    assert(balance_after == 42, 'Invalid balance');
-}
-
-#[test]
-#[feature("safe_dispatcher")]
-fn test_cannot_increase_balance_with_zero_value() {
-    let contract_address = deploy_contract("HelloStarknet");
-
-    let safe_dispatcher = IHelloStarknetSafeDispatcher { contract_address };
-
-    let balance_before = safe_dispatcher.get_balance().unwrap();
-    assert(balance_before == 0, 'Invalid balance');
-
-    match safe_dispatcher.increase_balance(0) {
-        Result::Ok(_) => core::panic_with_felt252('Should have panicked'),
-        Result::Err(panic_data) => {
-            assert(*panic_data.at(0) == 'Amount cannot be 0', *panic_data.at(0));
-        }
-    };
+    assert(factory_contract.total_voting_poll() == 1, 'wrong poll count');
 }
