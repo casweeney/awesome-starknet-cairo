@@ -14,6 +14,7 @@ mod Voting {
         title: ByteArray,
         candidates: Vec<Candidate>,
         voters: Map<ContractAddress, Voter>,
+        candidates_count: u256,
     }
 
     #[derive(Drop, Serde, starknet::Store)]
@@ -46,6 +47,8 @@ mod Voting {
                     }
                 );
             }
+
+            self.candidates_count.write(candidates.len());
         }
 
         fn vote(ref self: ContractState, candidate: u256) {
