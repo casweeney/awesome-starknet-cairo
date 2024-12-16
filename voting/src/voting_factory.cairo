@@ -39,6 +39,8 @@ mod VotingFactory {
             while i < self.voting_polls_count.read() + 1 {
                 let poll = self.voting_polls.entry(i).read();
                 voting_polls.append(poll);
+
+                i += 1;
             };
 
             voting_polls
