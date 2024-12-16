@@ -4,8 +4,7 @@ pub mod Voting {
     use starknet::{ContractAddress, get_caller_address};
     use core::starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, 
-        Map, StoragePathEntry,
-        MutableVecTrait, Vec
+        Map, StoragePathEntry
     };
 
     #[storage]
@@ -82,13 +81,26 @@ pub mod Voting {
         }
 
         fn winning_candidate(self: @ContractState) -> u256 {
-            // TODO Get winning candidate
-            8
+            let mut winning_candidate = 0;
+            let mut winning_vote_count = 0;
+            let mut i = 1;
+
+            while i < self.candidates_count.read() + 1 {
+                let candidate = self.candidates.entry(i).read();
+                if candidate.vote_count > winning_vote_count {
+                    winning_vote_count = candidate.vote_count;
+                    winning_candidate = i;
+                }
+            };
+
+
+            winning_candidate
         }
 
         fn winner_name(self: @ContractState) -> ByteArray {
-            // TODO Get winner name
-            ""
+            let winning_candidate = self.winning_candidate();
+            let winner_name = self.candidates.entry(winning_candidate).name.read();
+            winner_name
         }
 
         fn fetch_candidates(self: @ContractState) -> Array<Candidate> {
