@@ -1,8 +1,7 @@
 target
-.snfoundry_cache/
+.snfoundry_cache
 node_modules
 target
-src
 .env
 .DS_Store
 Scarb.toml
