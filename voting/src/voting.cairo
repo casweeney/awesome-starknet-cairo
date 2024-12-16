@@ -63,6 +63,8 @@ mod Voting {
             self.voters.entry(caller).write(voter);
 
             // TODO Increment Candidate VoteCount
+            
+
         }
 
         fn has_voted(self: @ContractState, voter: ContractAddress) -> bool {
