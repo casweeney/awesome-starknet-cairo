@@ -1,0 +1,21 @@
+{
+  "name": "synthetix_staking",
+  "version": "1.0.0",
+  "description": "This repo contains the implementation of Synthetix staking rewards contract in Cairo lang.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "deploy": "ts-node scripts/deploy.ts",
+    "deploy-r-t": "ts-node scripts/deployRewardToken.ts",
+    "deploy-s-t": "ts-node scripts/deployStakingToken.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "starknet": "^6.11.0"
+  }
+}
