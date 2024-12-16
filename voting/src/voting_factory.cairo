@@ -1,48 +1,51 @@
 #[starknet::contract]
 mod VotingFactory {
     use crate::interfaces::ivoting_factory::IVotingFactory;
-    use starknet::{ContractAddress, get_caller_address, contract_address_const};
+    use crate::interfaces::ivoting::{IVotingDispatcher, IVotingDispatcherTrait};
+    use starknet::{ContractAddress, syscalls::deploy_syscall, ClassHash, get_caller_address, get_contract_address};
     use core::starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, 
         Map, StoragePathEntry,
-        MutableVecTrait, Vec
     };
 
     #[storage]
     struct Storage {
-        factory: ContractAddress,
-        title: ByteArray,
-        candidates: Vec<Candidate>,
-        voters: Map<ContractAddress, Voter>,
-    }
-
-    #[derive(Drop, Serde, starknet::Store)]
-    pub struct Candidate {
-        pub name: ByteArray,
-        pub vote_count: u256,
-    }
-
-    #[derive(Copy, Drop, Serde, starknet::Store)]
-    pub struct Voter {
-        pub voted: bool,
-        pub vote: u256,
+        voting_polls: Map<u256, ContractAddress>,
+        voting_polls_count: u256,
     }
 
     #[abi(embed_v0)]
     impl VotingFactoryImpl of IVotingFactory<ContractState> {
-        fn create_poll(ref self: ContractState, title: ByteArray, candidates: Span<ByteArray>) {
-            
+        fn create_poll(ref self: ContractState, voting_poll_classhash: ClassHash, title: ByteArray, candidates: Array<ByteArray>) {
+            let mut constructor_calldata = array![];
+
+            let this_contract = get_contract_address();
+            this_contract.serialize(ref constructor_calldata);
+
+            let (voting_poll_contract, _) = deploy_syscall(voting_poll_classhash, 0, constructor_calldata.span(), false).unwrap();
+
+            let polls_count = self.voting_polls_count.read();
+            self.voting_polls_count.write(polls_count + 1);
+
+            self.voting_polls.entry(polls_count + 1).write(voting_poll_contract);
+
+            IVotingDispatcher{contract_address: voting_poll_contract}.create_poll(title, candidates);
         }
 
         fn get_voting_polls(self: @ContractState) -> Array<ContractAddress> {
-            let mut polls = array![contract_address_const::<0>()];
+            let mut voting_polls: Array<ContractAddress> = array![];
+            let mut i = 1;
 
-            polls
+            while i < self.voting_polls_count.read() + 1 {
+                let poll = self.voting_polls.entry(i).read();
+                voting_polls.append(poll);
+            };
+
+            voting_polls
         }
 
         fn total_voting_poll(self: @ContractState) -> u256 {
-
-            8
+            self.voting_polls_count.read()
         }
     }
 }
